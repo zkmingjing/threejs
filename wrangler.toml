@@ -1,0 +1,14 @@
+name = "threejs-solar-system"
+type = "webpack"
+account_id = "" # 需要填入你的Cloudflare账户ID
+workers_dev = true
+
+[site]
+bucket = "./dist" # 构建输出目录
+
+[build]
+command = "npm run build" # 构建命令
+
+[env.production]
+name = "threejs-solar-system-prod"
+route = "" # 需要填入你的域名 
