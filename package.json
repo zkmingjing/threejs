@@ -18,14 +18,9 @@
     "three": "0.160.0"
   },
   "devDependencies": {
-    "vite": "5.4.15",
-    "terser": "5.39.0",
-    "wrangler": "3.114.2",
-    "@vitejs/plugin-basic-ssl": "1.0.2"
-  },
-  "overrides": {
-    "rollup": {
-      "@rollup/rollup-linux-x64-gnu": "4.6.1"
-    }
+    "vite": "4.5.2",
+    "terser": "5.16.9",
+    "wrangler": "3.19.0",
+    "@vitejs/plugin-basic-ssl": "1.0.1"
   }
 }

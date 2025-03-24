@@ -12,15 +12,10 @@ export default defineConfig({
     sourcemap: true,
     // 压缩选项
     minify: 'terser',
-    // 分块策略
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // 将three.js相关代码单独打包
-          vendor: ['three']
-        }
-      }
-    }
+    // 关闭 brotli 压缩大小报告
+    brotliSize: false,
+    // 设置为 ES2015 以获得更好的浏览器兼容性
+    target: 'es2015'
   },
   // 开发服务器配置
   server: {
