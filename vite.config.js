@@ -17,8 +17,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           // 将three.js相关代码单独打包
-          three: ['three'],
-          // 将其他依赖打包
           vendor: ['three']
         }
       }
