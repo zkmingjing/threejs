@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太阳系行星展示</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        
+        /* 弹窗样式 */
+        .planet-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 40, 0.3);
+            padding: 30px;
+            border-radius: 15px;
+            color: #fff;
+            z-index: 1000;
+            min-width: 300px;
+            max-width: 500px;
+            max-height: 70vh;
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.2),
+                        inset 0 0 20px rgba(0, 150, 255, 0.1);
+            border: 1px solid rgba(0, 150, 255, 0.2);
+            backdrop-filter: blur(8px);
+            animation: modalAppear 0.3s ease-out;
+        }
+
+        /* 弹窗头部固定样式 */
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 40, 0.95);
+            padding: 15px 0;
+            margin-bottom: 20px;
+            z-index: 1002;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.2);
+            backdrop-filter: blur(8px);
+        }
+
+        /* 弹窗内容区域样式 */
+        .modal-content {
+            max-height: calc(70vh - 100px);
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-top: 10px;
+        }
+
+        /* 自定义滚动条样式 */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(0, 150, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 150, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 150, 255, 0.3);
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        .planet-modal h2 {
+            margin-top: 0;
+            color: #00ffff;
+            text-align: center;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            position: relative;
+            padding-right: 30px;
+        }
+
+        .planet-modal h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+        }
+        
+        .planet-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 150, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 150, 255, 0.1);
+        }
+        
+        .planet-info p {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.05);
+        }
+
+        .planet-info p:last-child {
+            border-bottom: none;
+        }
+        
+        .satellites-list {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 150, 255, 0.1);
+        }
+        
+        .satellites-list h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        
+        .satellite-item {
+            margin: 10px 0;
+            padding: 15px;
+            background: rgba(0, 150, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 150, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .satellite-item:hover {
+            background: rgba(0, 150, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #00ffff;
+            cursor: pointer;
+            font-size: 24px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0, 150, 255, 0.05);
+            transition: all 0.3s ease;
+            z-index: 1003;
+        }
+
+        .close-modal:hover {
+            background: rgba(0, 150, 255, 0.1);
+            transform: rotate(90deg);
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            backdrop-filter: blur(5px);
+            animation: overlayAppear 0.3s ease-out;
+        }
+
+        @keyframes overlayAppear {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* 添加星空背景效果 */
+        .planet-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, 
+                rgba(0, 150, 255, 0.05) 0%,
+                rgba(0, 0, 40, 0.3) 100%);
+            border-radius: 15px;
+            z-index: -1;
+        }
+
+        /* 添加闪烁的星星效果 */
+        .planet-modal::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.2;
+            animation: twinkle 4s infinite;
+            border-radius: 15px;
+            z-index: -1;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.3; }
+        }
+
+        .special-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 150, 255, 0.1);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+        }
+
+        .special-info h3 {
+            color: #00ffff;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .special-info p {
+            margin: 8px 0;
+            color: #ffffff;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .special-info p:before {
+            content: '•';
+            color: #00ffff;
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+
+        .name-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 40, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .name-toggle label {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .name-toggle input[type="checkbox"] {
+            appearance: none;
+            width: 40px;
+            height: 20px;
+            background: rgba(0, 150, 255, 0.3);
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .name-toggle input[type="checkbox"]:checked {
+            background: rgba(0, 255, 255, 0.5);
+        }
+
+        .name-toggle input[type="checkbox"]::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffffff;
+            top: 2px;
+            left: 2px;
+            transition: 0.3s;
+        }
+
+        .name-toggle input[type="checkbox"]:checked::before {
+            left: 22px;
+        }
+
+        .planet-name {
+            position: absolute;
+            color: #00ff00;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .planet-name.visible {
+            opacity: 1;
+        }
+
+        /* 为彗星添加特殊样式 */
+        .planet-name[data-planet="comet"] {
+            color: #00ffff;
+            font-size: 18px;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+        }
+
+        /* 行星详细视图样式 */
+        .planet-detail-container {
+            backdrop-filter: blur(10px);
+        }
+
+        .detail-header {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .detail-header h2 {
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            font-size: 24px;
+        }
+
+        .detail-info-panel {
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .detail-info-panel h3 {
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.3);
+        }
+
+        .detail-info-panel p {
+            margin: 8px 0;
+            line-height: 1.6;
+            color: #ffffff;
+        }
+
+        .detail-info-panel p:before {
+            content: '•';
+            color: #00ff00;
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+
+        /* 卫星信息卡片样式 */
+        .detail-info-panel div[style*="background: rgba(0, 150, 255, 0.1)"] {
+            transition: all 0.3s ease;
+        }
+
+        .detail-info-panel div[style*="background: rgba(0, 150, 255, 0.1)"]:hover {
+            background: rgba(0, 150, 255, 0.2) !important;
+            transform: translateX(5px);
+        }
+
+        /* 3D视图容器样式 */
+        #planet-detail-view {
+            background: radial-gradient(circle at 50% 50%, 
+                rgba(0, 0, 40, 0.8) 0%,
+                rgba(0, 0, 20, 0.9) 100%);
+        }
+
+        #planet-detail-view canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* 添加星空背景效果 */
+        #planet-detail-view::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.2;
+            animation: twinkle 4s infinite;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 弹窗组件 -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="planet-modal" id="planetModal">
+        <div class="modal-header">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 id="planetName"></h2>
+        </div>
+        <div class="modal-content">
+            <div class="planet-info">
+                <p>半径: <span id="planetRadius"></span></p>
+                <p>距离太阳: <span id="planetDistance"></span></p>
+                <p>公转速度: <span id="planetSpeed"></span></p>
+            </div>
+            <div class="satellites-list">
+                <h3>卫星</h3>
+                <div id="satellitesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加名称显示开关 -->
+    <div class="name-toggle">
+        <label>显示名称</label>
+        <input type="checkbox" id="showNames">
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js"
+            }
+        }
+    </script>
+    <script type="module" src="main.js"></script>
+</body>
+</html> 
