@@ -8,3 +8,12 @@ dist = "dist"
 [env.production]
 name = "threejs-solar-system-prod"
 route = "" # 需要填入你的域名 
+
+[build.upload]
+format = "directory"
+
+[site]
+bucket = "./dist"
+
+[build.environment]
+NODE_VERSION = "18" 
