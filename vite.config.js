@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
 export default defineConfig({
   // 构建配置
@@ -26,6 +27,11 @@ export default defineConfig({
   // 开发服务器配置
   server: {
     port: 3000,
-    open: true
-  }
+    open: true,
+    https: true
+  },
+  // 插件配置
+  plugins: [
+    basicSsl()
+  ]
 }) 
