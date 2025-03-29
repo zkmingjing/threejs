@@ -158,46 +158,71 @@ class Comet {
         // 彗星组
         this.group = new THREE.Group();
         
-        // 彗星本体 - 使用真实纹理贴图
+        // 彗星本体 - 使用程序生成的纹理代替问题纹理
         const cometGeometry = new THREE.SphereGeometry(4, 32, 32);
-        const cometTexture = textureLoader.load('./src/assets/textures/comet/comet.jpg');
-        const cometMaterial = new THREE.MeshPhongMaterial({ 
+        
+        // 创建一个程序生成的彗星纹理，而不是加载可能有问题的文件
+        const cometTexture = this.generateCometTexture();
+        
+        // 使用更亮、更丰富的材质
+        const cometMaterial = new THREE.MeshStandardMaterial({ 
             map: cometTexture,
-            bumpScale: 0.05,
-            shininess: 5,
-            emissive: 0x222222
+            bumpScale: 0.1,
+            roughness: 0.7,
+            metalness: 0.1,
+            emissive: 0x445566,
+            emissiveIntensity: 0.3,
+            color: 0xaabbcc  // 添加基础颜色，防止材质完全黑色
         });
+        
         this.body = new THREE.Mesh(cometGeometry, cometMaterial);
         this.group.add(this.body);
         
-        // 彗星尾巴 - 使用更自然的粒子系统
+        // 彗星尾巴 - 使用自定义材质代替可能有问题的纹理
         const tailGeometry = new THREE.ConeGeometry(5, 60, 32);
-        const tailTexture = textureLoader.load('./src/assets/textures/comet/tail.jpg');
+        
+        // 使用程序生成的尾巴纹理
+        const tailTexture = this.generateTailTexture();
+        
         const tailMaterial = new THREE.MeshPhongMaterial({
             map: tailTexture,
             transparent: true,
-            opacity: 0.7,
+            opacity: 0.8,
             side: THREE.DoubleSide,
             blending: THREE.AdditiveBlending,
-            emissive: 0x334455,
-            emissiveIntensity: 0.5
+            emissive: 0x6688aa,
+            emissiveIntensity: 0.8,
+            color: 0x88aadd  // 添加基础颜色
         });
+        
         this.tail = new THREE.Mesh(tailGeometry, tailMaterial);
         this.tail.rotation.x = Math.PI / 2;
         this.tail.position.z = -30;
         this.group.add(this.tail);
         
+        // 添加彗星光晕效果
+        const glowGeometry = new THREE.SphereGeometry(7, 32, 32);
+        const glowMaterial = new THREE.MeshBasicMaterial({
+            color: 0x4499ff,
+            transparent: true,
+            opacity: 0.15,
+            side: THREE.BackSide
+        });
+        this.glow = new THREE.Mesh(glowGeometry, glowMaterial);
+        this.group.add(this.glow);
+        
         // 椭圆轨道参数 - 使用更明显的椭圆
-        this.a = 50;          // 半长轴
-        this.b = 20;          // 半短轴
-        this.e = 0.6;         // 离心率
-        this.period = 20;     // 周期（秒）
+        this.a = 80;          // 半长轴增大，使轨道更大
+        this.b = 40;          // 半短轴
+        this.e = 0.7;         // 离心率增大，使轨道更明显为椭圆
+        this.period = 30;     // 周期（秒）增大，减慢速度
         this.startTime = Date.now();
         
         // 添加调试信息 - 移到前面创建
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5); // 减小调试标记大小
         const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
         this.debugMarker = new THREE.Mesh(geometry, material);
+        this.debugMarker.visible = false; // 默认隐藏调试标记
         this.scene.add(this.debugMarker);
         
         // 创建一个明显的椭圆轨道
@@ -206,7 +231,173 @@ class Comet {
         // 初始位置 - 移到最后调用
         this.updatePosition(0);
         
+        // 粒子系统 - 为彗星添加尾部粒子效果
+        this.createParticleSystem();
+        
         console.log('彗星创建完成');
+    }
+    
+    // 程序生成彗星表面纹理
+    generateCometTexture() {
+        // 创建一个canvas用于生成纹理
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const context = canvas.getContext('2d');
+        
+        // 绘制彗星表面 - 灰色基础
+        context.fillStyle = '#445566';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 添加纹理细节 - 更多的岩石特征和明暗变化
+        for (let i = 0; i < 5000; i++) {
+            // 随机位置
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            
+            // 随机大小和颜色
+            const size = Math.random() * 4 + 1;
+            const brightness = Math.floor(Math.random() * 40 + 30);
+            const color = `rgb(${brightness + 35}, ${brightness + 40}, ${brightness + 45})`;
+            
+            // 绘制小圆点模拟岩石和撞击坑
+            context.fillStyle = color;
+            context.beginPath();
+            context.arc(x, y, size, 0, Math.PI * 2);
+            context.fill();
+        }
+        
+        // 添加一些较大的撞击坑
+        for (let i = 0; i < 40; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const radius = Math.random() * 20 + 5;
+            
+            // 绘制环形撞击坑
+            context.fillStyle = '#334455';
+            context.beginPath();
+            context.arc(x, y, radius, 0, Math.PI * 2);
+            context.fill();
+            
+            // 添加撞击坑边缘
+            context.strokeStyle = '#556677';
+            context.lineWidth = 2;
+            context.beginPath();
+            context.arc(x, y, radius, 0, Math.PI * 2);
+            context.stroke();
+            
+            // 添加撞击坑中心
+            context.fillStyle = '#223344';
+            context.beginPath();
+            context.arc(x, y, radius * 0.6, 0, Math.PI * 2);
+            context.fill();
+        }
+        
+        // 创建纹理
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        
+        return texture;
+    }
+    
+    // 程序生成彗星尾部纹理
+    generateTailTexture() {
+        // 创建一个canvas用于生成纹理
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const context = canvas.getContext('2d');
+        
+        // 设置渐变背景
+        const gradient = context.createRadialGradient(
+            canvas.width / 2, canvas.height / 2, 0,
+            canvas.width / 2, canvas.height / 2, canvas.width / 2
+        );
+        gradient.addColorStop(0, 'rgba(100, 150, 255, 0.9)');
+        gradient.addColorStop(0.5, 'rgba(80, 120, 220, 0.5)');
+        gradient.addColorStop(1, 'rgba(60, 100, 180, 0)');
+        
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 添加尾巴纹理细节
+        for (let i = 0; i < 1000; i++) {
+            // 越接近中心，密度越大
+            const angle = Math.random() * Math.PI * 2;
+            const distance = Math.random() * canvas.width / 2;
+            
+            const x = canvas.width / 2 + Math.cos(angle) * distance;
+            const y = canvas.height / 2 + Math.sin(angle) * distance;
+            
+            // 亮度随距离减弱
+            const alpha = 1 - (distance / (canvas.width / 2));
+            const size = Math.random() * 2 + 0.5;
+            
+            context.fillStyle = `rgba(200, 220, 255, ${alpha * 0.6})`;
+            context.beginPath();
+            context.arc(x, y, size, 0, Math.PI * 2);
+            context.fill();
+        }
+        
+        // 创建纹理
+        const texture = new THREE.CanvasTexture(canvas);
+        
+        return texture;
+    }
+    
+    // 为彗星添加粒子系统尾巴效果
+    createParticleSystem() {
+        // 粒子数量
+        const particleCount = 2000;
+        
+        // 粒子几何体
+        const particles = new THREE.BufferGeometry();
+        
+        // 粒子位置数组
+        const positions = new Float32Array(particleCount * 3);
+        
+        // 粒子尺寸数组
+        const sizes = new Float32Array(particleCount);
+        
+        // 初始化粒子位置和尺寸
+        for (let i = 0; i < particleCount; i++) {
+            // 在彗星背后的圆锥体内分布粒子
+            const distance = Math.random() * 80; // 粒子从彗星向后延伸的距离
+            const angle = Math.random() * Math.PI * 2; // 随机角度
+            const radius = Math.random() * 10 * (distance / 80); // 随距离增大的半径
+            
+            // 计算粒子位置
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            const z = -distance; // 粒子在彗星后方
+            
+            // 设置粒子位置
+            positions[i * 3] = x;
+            positions[i * 3 + 1] = y;
+            positions[i * 3 + 2] = z;
+            
+            // 设置粒子尺寸（越远越小）
+            sizes[i] = Math.random() * 2 * (1 - distance / 80);
+        }
+        
+        // 设置粒子位置和尺寸属性
+        particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        particles.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        
+        // 粒子材质
+        const particleMaterial = new THREE.PointsMaterial({
+            color: 0x88ccff,
+            size: 1.5,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true
+        });
+        
+        // 创建粒子系统
+        this.particles = new THREE.Points(particles, particleMaterial);
+        this.group.add(this.particles);
     }
     
     createOrbit() {

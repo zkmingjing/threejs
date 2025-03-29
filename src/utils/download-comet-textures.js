@@ -1,26 +1,36 @@
-const fs = require('fs');
-const path = require('path');
-const https = require('https');
+import fs from 'fs';
+import path from 'path';
+import https from 'https';
+import { fileURLToPath } from 'url';
+
+// 获取当前目录
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 创建存放彗星纹理的目录
-const texturesDir = path.join(process.cwd(), 'textures', 'comet');
+const texturesDir = path.join(path.resolve(__dirname, '..', '..'), 'textures', 'comet');
 
 // 确保目录存在
 if (!fs.existsSync(texturesDir)) {
     fs.mkdirSync(texturesDir, { recursive: true });
 }
 
-// NASA的彗星相关纹理
+// NASA的彗星相关纹理 - 使用开放访问的图片链接
 const textures = [
     {
         name: 'comet.jpg',
-        url: 'https://solarsystem.nasa.gov/system/resources/detail_files/1818_comet_67p_node_full_image_2.jpg',
-        description: '彗星67P/楚留莫夫-格拉西门克的表面纹理（ESA/Rosetta任务）'
+        url: 'https://photojournal.jpl.nasa.gov/jpeg/PIA23868.jpg',
+        description: 'NEOWISE彗星（NASA/JPL图片）'
     },
     {
         name: 'tail.jpg',
-        url: 'https://solarsystem.nasa.gov/system/resources/detail_files/1077_hubbleborrelly.jpg',
-        description: '博雷利彗星的尾巴（哈勃太空望远镜拍摄）'
+        url: 'https://photojournal.jpl.nasa.gov/jpeg/PIA24426.jpg',
+        description: '彗星尾巴（NASA/JPL图片）'
+    },
+    {
+        name: 'surface.jpg',
+        url: 'https://photojournal.jpl.nasa.gov/jpeg/PIA18419.jpg',
+        description: '彗星67P表面（NASA/JPL图片）'
     }
 ];
 
@@ -32,6 +42,27 @@ function downloadFile(url, filePath, description) {
         const file = fs.createWriteStream(filePath);
         
         https.get(url, (response) => {
+            // 处理重定向
+            if (response.statusCode === 301 || response.statusCode === 302) {
+                console.log(`重定向到: ${response.headers.location}`);
+                https.get(response.headers.location, (redirectResponse) => {
+                    if (redirectResponse.statusCode !== 200) {
+                        reject(new Error(`HTTP错误! 状态: ${redirectResponse.statusCode}`));
+                        return;
+                    }
+                    redirectResponse.pipe(file);
+                    file.on('finish', () => {
+                        file.close();
+                        console.log(`纹理 ${path.basename(filePath)} 下载完成！`);
+                        resolve();
+                    });
+                }).on('error', (err) => {
+                    fs.unlink(filePath, () => {});
+                    reject(err);
+                });
+                return;
+            }
+            
             if (response.statusCode !== 200) {
                 reject(new Error(`HTTP错误! 状态: ${response.statusCode}`));
                 return;
