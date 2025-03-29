@@ -158,24 +158,33 @@ class Comet {
         // 彗星组
         this.group = new THREE.Group();
         
-        // 彗星本体 - 使用更大、更亮的球体
+        // 彗星本体 - 使用真实纹理贴图
         const cometGeometry = new THREE.SphereGeometry(4, 32, 32);
-        const cometMaterial = new THREE.MeshBasicMaterial({ 
-            color: 0xFF0000  // 纯红色
+        const cometTexture = textureLoader.load('./src/assets/textures/comet/comet.jpg');
+        const cometMaterial = new THREE.MeshPhongMaterial({ 
+            map: cometTexture,
+            bumpScale: 0.05,
+            shininess: 5,
+            emissive: 0x222222
         });
         this.body = new THREE.Mesh(cometGeometry, cometMaterial);
         this.group.add(this.body);
         
-        // 彗星尾巴 - 使用简单的圆锥体
-        const tailGeometry = new THREE.ConeGeometry(5, 40, 32);
-        const tailMaterial = new THREE.MeshBasicMaterial({
-            color: 0xFFFF00, // 黄色尾巴
+        // 彗星尾巴 - 使用更自然的粒子系统
+        const tailGeometry = new THREE.ConeGeometry(5, 60, 32);
+        const tailTexture = textureLoader.load('./src/assets/textures/comet/tail.jpg');
+        const tailMaterial = new THREE.MeshPhongMaterial({
+            map: tailTexture,
             transparent: true,
-            opacity: 0.8
+            opacity: 0.7,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending,
+            emissive: 0x334455,
+            emissiveIntensity: 0.5
         });
         this.tail = new THREE.Mesh(tailGeometry, tailMaterial);
         this.tail.rotation.x = Math.PI / 2;
-        this.tail.position.z = -20;
+        this.tail.position.z = -30;
         this.group.add(this.tail);
         
         // 椭圆轨道参数 - 使用更明显的椭圆
@@ -740,7 +749,8 @@ function createStarfield() {
         transparent: true,
         opacity: 1.0, // 完全不透明
         sizeAttenuation: true,
-        map: starTextureSprite // 使用星星纹理
+        map: starTextureSprite, // 使用星星纹理
+        alphaTest: 0.5 // 添加alphaTest属性去除黑色背景
     });
     
     const starsVertices = [];
@@ -763,7 +773,8 @@ function createStarfield() {
         opacity: 0.6, // 增加星云不透明度
         sizeAttenuation: true,
         blending: THREE.AdditiveBlending,
-        map: starTextureSprite // 使用相同的星星纹理
+        map: starTextureSprite, // 使用相同的星星纹理
+        alphaTest: 0.2 // 添加alphaTest属性去除黑色背景
     });
     
     const nebulaVertices = [];

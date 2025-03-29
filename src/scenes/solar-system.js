@@ -142,24 +142,33 @@ class Comet {
         // 彗星组
         this.group = new THREE.Group();
         
-        // 彗星本体 - 使用更大、更亮的球体
+        // 彗星本体 - 使用真实纹理贴图
         const cometGeometry = new THREE.SphereGeometry(4, 32, 32);
-        const cometMaterial = new THREE.MeshBasicMaterial({ 
-            color: 0xFF0000  // 纯红色
+        const cometTexture = textureLoader.load('./src/assets/textures/comet/comet.jpg');
+        const cometMaterial = new THREE.MeshPhongMaterial({ 
+            map: cometTexture,
+            bumpScale: 0.05,
+            shininess: 5,
+            emissive: 0x222222
         });
         this.body = new THREE.Mesh(cometGeometry, cometMaterial);
         this.group.add(this.body);
         
-        // 彗星尾巴 - 使用简单的圆锥体
-        const tailGeometry = new THREE.ConeGeometry(5, 40, 32);
-        const tailMaterial = new THREE.MeshBasicMaterial({
-            color: 0xFFFF00, // 黄色尾巴
+        // 彗星尾巴 - 使用更自然的粒子系统
+        const tailGeometry = new THREE.ConeGeometry(5, 60, 32);
+        const tailTexture = textureLoader.load('./src/assets/textures/comet/tail.jpg');
+        const tailMaterial = new THREE.MeshPhongMaterial({
+            map: tailTexture,
             transparent: true,
-            opacity: 0.8
+            opacity: 0.7,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending,
+            emissive: 0x334455,
+            emissiveIntensity: 0.5
         });
         this.tail = new THREE.Mesh(tailGeometry, tailMaterial);
         this.tail.rotation.x = Math.PI / 2;
-        this.tail.position.z = -20;
+        this.tail.position.z = -30;
         this.group.add(this.tail);
         
         // 椭圆轨道参数 - 使用更明显的椭圆
@@ -492,14 +501,21 @@ function createPlanets() {
 // 创建星空背景
 function createStarfield() {
     const starsGeometry = new THREE.BufferGeometry();
+    
+    // 加载星星纹理，使用圆形纹理替代默认方形点
+    const starTextureSprite = textureLoader.load('./src/assets/textures/nasa/star.png');
+    
     const starsMaterial = new THREE.PointsMaterial({
         color: 0xFFFFFF,
-        size: 0.1,
-        transparent: true
+        size: 0.3,
+        transparent: true,
+        opacity: 0.8,
+        sizeAttenuation: true,
+        map: starTextureSprite // 使用星星纹理
     });
 
     const starsVertices = [];
-    for (let i = 0; i < 20000; i++) {
+    for (let i = 0; i < 15000; i++) {
         const x = (Math.random() - 0.5) * 2000;
         const y = (Math.random() - 0.5) * 2000;
         const z = (Math.random() - 0.5) * 2000;
@@ -509,6 +525,30 @@ function createStarfield() {
     starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
     const starField = new THREE.Points(starsGeometry, starsMaterial);
     scene.add(starField);
+    
+    // 添加发光星云效果
+    const nebulaMaterial = new THREE.PointsMaterial({
+        color: 0x5599ff, // 蓝色
+        size: 3,
+        transparent: true,
+        opacity: 0.4,
+        sizeAttenuation: true,
+        blending: THREE.AdditiveBlending,
+        map: starTextureSprite // 使用相同的星星纹理
+    });
+    
+    const nebulaVertices = [];
+    for (let i = 0; i < 200; i++) {
+        const x = (Math.random() - 0.5) * 1500;
+        const y = (Math.random() - 0.5) * 1500;
+        const z = (Math.random() - 0.5) * 1500;
+        nebulaVertices.push(x, y, z);
+    }
+    
+    const nebulaGeometry = new THREE.BufferGeometry();
+    nebulaGeometry.setAttribute('position', new THREE.Float32BufferAttribute(nebulaVertices, 3));
+    const nebula = new THREE.Points(nebulaGeometry, nebulaMaterial);
+    scene.add(nebula);
 }
 
 // 处理窗口大小改变
@@ -573,4 +613,4 @@ function animate() {
 }
 
 // 等待DOM加载完成后再初始化
-document.addEventListener('DOMContentLoaded', init); 
+document.addEventListener('DOMContentLoaded', init);
