@@ -15,7 +15,7 @@ const planetData = {
         radius: 0.383,
         distance: 8,        // 调整距离
         speed: 0.04,
-        textureUrl: '/assets/textures/nasa/mercury.jpg',
+        textureUrl: '/assets/textures/planets/mercury.jpg',
         color: 0x93764C,
         satellites: [],
         info: "水星是太阳系最小的行星，也是距离太阳最近的行星。表面布满撞击坑，没有大气层。"
@@ -24,7 +24,7 @@ const planetData = {
         radius: 0.949, 
         distance: 15,       // 调整距离
         speed: 0.03,
-        textureUrl: '/assets/textures/nasa/venus.jpg',
+        textureUrl: '/assets/textures/planets/venus.jpg',
         color: 0xE6B87C,
         satellites: [],
         info: "金星是太阳系中最热的行星，表面温度可达460°C，拥有厚重的二氧化碳大气层。"
@@ -33,7 +33,7 @@ const planetData = {
         radius: 1, 
         distance: 25,       // 调整距离
         speed: 0.025,
-        textureUrl: '/assets/textures/nasa/earth.jpg',
+        textureUrl: '/assets/textures/planets/earth.jpg',
         color: 0x6B93D6,
         satellites: [
             {
@@ -41,7 +41,7 @@ const planetData = {
                 radius: 0.273,
                 distance: 2,
                 speed: 0.05,
-                textureUrl: '/assets/textures/nasa/moon.jpg',
+                textureUrl: '/assets/textures/satellites/moon.jpg',
                 color: 0xCCCCCC,
                 info: "月球是地球唯一的天然卫星，对地球的潮汐有重要影响。"
             }
@@ -52,7 +52,7 @@ const planetData = {
         radius: 0.532, 
         distance: 35,       // 调整距离
         speed: 0.02,
-        textureUrl: '/assets/textures/nasa/mars.jpg',
+        textureUrl: '/assets/textures/planets/mars.jpg',
         color: 0xC1440E,
         satellites: [],
         info: "火星被称为红色星球，表面有明显的极冠和峡谷系统，曾经可能有过液态水。"
@@ -61,7 +61,7 @@ const planetData = {
         radius: 11.209, 
         distance: 48,       // 调整距离
         speed: 0.015,
-        textureUrl: '/assets/textures/nasa/jupiter.jpg',
+        textureUrl: '/assets/textures/planets/jupiter.jpg',
         color: 0xC88B3A,
         satellites: [
             {
@@ -69,7 +69,7 @@ const planetData = {
                 radius: 0.286,
                 distance: 3,
                 speed: 0.04,
-                textureUrl: '/assets/textures/nasa/io.jpg',
+                textureUrl: '/assets/textures/satellites/io.jpg',
                 color: 0xFFFF00,
                 info: "木卫一(Io)是太阳系中火山活动最活跃的天体。"
             },
@@ -78,7 +78,7 @@ const planetData = {
                 radius: 0.245,
                 distance: 4,
                 speed: 0.035,
-                textureUrl: '/assets/textures/nasa/europa.jpg',
+                textureUrl: '/assets/textures/satellites/europa.jpg',
                 color: 0xCCCCCC,
                 info: "木卫二(Europa)表面覆盖冰层，下面可能有液态水海洋。"
             }
@@ -89,8 +89,8 @@ const planetData = {
         radius: 9.449, 
         distance: 67,       // 调整距离
         speed: 0.01,
-        textureUrl: '/assets/textures/nasa/saturn.jpg',
-        ringUrl: '/assets/textures/nasa/saturn-rings.png',
+        textureUrl: '/assets/textures/planets/saturn.jpg',
+        ringUrl: '/assets/textures/planets/saturn-rings.png',
         color: 0xEAD6B8,
         satellites: [],
         info: "土星以其壮观的环系统而闻名，主要由冰粒子组成，有超过80颗已知卫星。"
@@ -99,7 +99,7 @@ const planetData = {
         radius: 4.007, 
         distance: 87,       // 调整距离
         speed: 0.008,
-        textureUrl: '/assets/textures/nasa/uranus.jpg',
+        textureUrl: '/assets/textures/planets/uranus.jpg',
         color: 0x82B3D1,
         satellites: [],
         info: "天王星是太阳系中唯一一个几乎侧卧旋转的行星，有27颗已知卫星。"
@@ -108,7 +108,7 @@ const planetData = {
         radius: 3.883, 
         distance: 100,      // 调整距离
         speed: 0.006,
-        textureUrl: '/assets/textures/nasa/neptune.jpg',
+        textureUrl: '/assets/textures/planets/neptune.jpg',
         color: 0x2B55D3,
         satellites: [],
         info: "海王星是太阳系中风速最高的行星，有明显的大暗斑和强烈的风暴系统。"
@@ -138,6 +138,12 @@ loadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
 // 加载错误处理
 loadingManager.onError = function(url) {
     console.error('加载错误:', url);
+    
+    // 如果错误是关于star.png的，则不在界面显示
+    if (url.includes('star.png')) {
+        return; // 忽略star.png的错误
+    }
+    
     const errorMessage = document.getElementById('error-message');
     if (errorMessage) {
         errorMessage.style.display = 'block';
@@ -158,11 +164,18 @@ class Comet {
         // 彗星组
         this.group = new THREE.Group();
         
-        // 彗星本体 - 使用程序生成的纹理代替问题纹理
+        // 彗星本体 - 尝试加载彗星表面纹理
         const cometGeometry = new THREE.SphereGeometry(4, 32, 32);
         
-        // 创建一个程序生成的彗星纹理，而不是加载可能有问题的文件
-        const cometTexture = this.generateCometTexture();
+        // 尝试加载彗星表面纹理
+        let cometTexture;
+        try {
+            cometTexture = textureLoader.load('/assets/textures/comet/surface.jpg');
+            console.log('彗星表面纹理加载成功');
+        } catch (error) {
+            console.warn('无法加载彗星表面纹理，使用程序生成的纹理代替', error);
+            cometTexture = this.generateCometTexture();
+        }
         
         // 使用更亮、更丰富的材质
         const cometMaterial = new THREE.MeshStandardMaterial({ 
@@ -178,11 +191,18 @@ class Comet {
         this.body = new THREE.Mesh(cometGeometry, cometMaterial);
         this.group.add(this.body);
         
-        // 彗星尾巴 - 使用自定义材质代替可能有问题的纹理
+        // 彗星尾巴 - 尝试加载彗星尾巴纹理
         const tailGeometry = new THREE.ConeGeometry(5, 60, 32);
         
-        // 使用程序生成的尾巴纹理
-        const tailTexture = this.generateTailTexture();
+        // 尝试加载彗星尾巴纹理
+        let tailTexture;
+        try {
+            tailTexture = textureLoader.load('/assets/textures/comet/tail.jpg');
+            console.log('彗星尾巴纹理加载成功');
+        } catch (error) {
+            console.warn('无法加载彗星尾巴纹理，使用程序生成的纹理代替', error);
+            tailTexture = this.generateTailTexture();
+        }
         
         const tailMaterial = new THREE.MeshPhongMaterial({
             map: tailTexture,
@@ -460,20 +480,27 @@ let sunGlow, sunCore;
  * 初始化太阳系场景
  */
 function init() {
-    console.log('初始化太阳系场景...');
+    console.log('初始化太阳系模型...');
     
-    // 清除可能存在的重复内容
-    const existingCanvas = document.querySelector('canvas');
-    if (existingCanvas) {
-        document.body.removeChild(existingCanvas);
+    // 清理可能存在的旧元素
+    cleanupExistingElements();
+    
+    // 清除已显示的star.png错误信息
+    const errorMessage = document.getElementById('error-message');
+    if (errorMessage && errorMessage.innerHTML.includes('star.png')) {
+        errorMessage.style.display = 'none';
     }
     
-    // 显示操作指南
-    console.log('%c太阳系交互指南', 'color: yellow; font-size: 14px; font-weight: bold;');
-    console.log('%c左键拖动: 旋转视角 | 右键拖动: 平移 | 滚轮: 缩放 | 点击行星: 查看信息', 'color: cyan;');
+    // 创建加载信息
+    const loadingMessage = document.getElementById('loading-message');
+    if (loadingMessage) {
+        loadingMessage.innerHTML = '正在加载太阳系...';
+        loadingMessage.style.display = 'block';
+    }
     
     // 创建场景
     scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000010);
     
     // 创建相机 - 调整相机位置和视角以看到整个太阳系
     camera = new THREE.PerspectiveCamera(
@@ -672,6 +699,61 @@ function init() {
     animate();
     
     console.log('太阳系场景初始化完成');
+}
+
+/**
+ * 清理可能存在的旧元素
+ */
+function cleanupExistingElements() {
+    // 检查是否有旧的UI元素，如果有则移除
+    const oldControls = document.querySelectorAll('.control-panel');
+    if (oldControls.length > 0) {
+        oldControls.forEach(el => {
+            if (el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        });
+    }
+    
+    // 检查是否有旧的行星标签
+    const oldLabels = document.querySelectorAll('.planet-label');
+    if (oldLabels.length > 0) {
+        oldLabels.forEach(el => {
+            if (el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        });
+    }
+    
+    // 检查是否有旧的行星信息弹窗
+    const oldModals = document.querySelectorAll('.planet-modal, .modal-overlay');
+    if (oldModals.length > 0) {
+        oldModals.forEach(el => {
+            if (el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        });
+    }
+    
+    // 检查是否有旧的交互提示
+    const oldHints = document.querySelectorAll('.interaction-hint');
+    if (oldHints.length > 0) {
+        oldHints.forEach(el => {
+            if (el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        });
+    }
+    
+    // 重置全局变量
+    scene = null;
+    camera = null;
+    renderer = null;
+    controls = null;
+    sun = null;
+    planets = {};
+    
+    console.log('已清理太阳系模型旧元素');
 }
 
 /**
@@ -901,7 +983,7 @@ function createStarfield() {
     console.log('创建星空背景...');
     
     // 加载NASA的星空纹理 - 修复路径问题
-    const starTexture = textureLoader.load('/assets/textures/nasa/stars.jpg');
+    const starTexture = textureLoader.load('/assets/textures/planets/stars.jpg');
     
     // 增强纹理效果
     starTexture.wrapS = THREE.RepeatWrapping;
@@ -929,7 +1011,7 @@ function createStarfield() {
     const starsGeometry = new THREE.BufferGeometry();
     
     // 加载星星纹理，使用圆形纹理替代默认方形点
-    const starTextureSprite = textureLoader.load('/assets/textures/nasa/star.png');
+    const starTextureSprite = textureLoader.load('/assets/textures/planets/star.png');
     
     const starsMaterial = new THREE.PointsMaterial({
         color: 0xffffff,

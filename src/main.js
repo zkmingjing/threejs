@@ -40,13 +40,8 @@ function main() {
 function loadModel(modelName) {
     console.log(`加载模型: ${modelName}`);
     
-    // 如果当前有渲染器在运行，先移除它
-    if (currentRenderer) {
-        const canvas = document.querySelector('canvas');
-        if (canvas) {
-            document.body.removeChild(canvas);
-        }
-    }
+    // 清除当前模型的HTML元素
+    clearCurrentModel();
     
     // 重置当前模型和渲染器
     currentModel = null;
@@ -73,6 +68,54 @@ function loadModel(modelName) {
     
     // 更新页面标题
     updatePageTitle(modelName);
+}
+
+/**
+ * 清除当前模型相关的所有元素
+ * 确保在切换模型时不会有残留
+ */
+function clearCurrentModel() {
+    // 1. 移除canvas元素
+    const canvases = document.querySelectorAll('canvas');
+    canvases.forEach(canvas => {
+        if (canvas.parentNode) {
+            canvas.parentNode.removeChild(canvas);
+        }
+    });
+    
+    // 2. 移除模型特定的UI元素
+    
+    // 移除dat.GUI控制器
+    const guiElements = document.querySelectorAll('.dg.ac');
+    guiElements.forEach(element => {
+        if (element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
+    });
+    
+    // 移除标注元素
+    const annotations = document.querySelectorAll('.annotation');
+    annotations.forEach(element => {
+        if (element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
+    });
+    
+    // 移除仪表盘和加载信息
+    const gaugeContainers = document.querySelectorAll('[style*="position: absolute"]');
+    gaugeContainers.forEach(element => {
+        // 只移除非模型选择器的浮动元素
+        if (!element.classList.contains('model-selector') && element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
+    });
+    
+    // 3. 内存清理 - 尝试触发垃圾回收
+    if (window.gc) {
+        window.gc();
+    }
+    
+    console.log('已清除当前模型');
 }
 
 /**

@@ -468,6 +468,51 @@
             animation: twinkle 4s infinite;
             pointer-events: none;
         }
+
+        /* 加载信息样式 */
+        .loading-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 40, 0.7);
+            color: #00ffff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 2000;
+            font-size: 18px;
+            min-width: 200px;
+            box-shadow: 0 0 20px rgba(0, 150, 255, 0.5);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+        }
+        
+        /* 错误信息样式 */
+        .error-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(40, 0, 0, 0.7);
+            color: #ff5555;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 2000;
+            font-size: 18px;
+            min-width: 200px;
+            box-shadow: 0 0 20px rgba(255, 50, 50, 0.5);
+            border: 1px solid rgba(255, 50, 50, 0.3);
+        }
+        
+        /* 标注样式 */
+        .annotation {
+            pointer-events: none;
+            user-select: none;
+            z-index: 1001;
+            transition: opacity 0.3s;
+        }
     </style>
 </head>
 <body>
@@ -479,6 +524,12 @@
             <option value="volcano">火山喷发</option>
         </select>
     </div>
+
+    <!-- 加载信息 -->
+    <div id="loading-message" class="loading-message"></div>
+    
+    <!-- 错误信息 -->
+    <div id="error-message" class="error-message"></div>
 
     <!-- 行星弹窗容器 -->
     <div id="modalOverlay" class="modal-overlay"></div>
