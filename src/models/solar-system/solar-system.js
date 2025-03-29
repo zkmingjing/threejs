@@ -665,9 +665,6 @@ function init() {
     // 添加点击事件监听器
     addClickEventListener();
     
-    // 添加行星名称切换功能
-    addNameToggle();
-    
     // 创建UI控制面板
     createControlPanel();
     
@@ -1130,22 +1127,77 @@ function updatePlanetLabels() {
     // 遍历所有行星更新其标签位置
     for (let planetName in planets) {
         const planet = planets[planetName];
-        if (planet.label) {
-            // 计算行星在屏幕上的位置
-            const position = new THREE.Vector3();
-            position.copy(planet.mesh.position);
-            position.project(camera);
+        // 只更新显示状态为block的标签
+        if (planet.label && planet.label.style.display === 'block') {
+            // 计算标签在屏幕上的位置
+            const vector = new THREE.Vector3();
+            vector.setFromMatrixPosition(planet.mesh.matrixWorld);
             
-            // 转换为页面坐标
-            const x = (position.x * 0.5 + 0.5) * window.innerWidth;
-            const y = (-position.y * 0.5 + 0.5) * window.innerHeight;
+            // 检查行星是否在相机前方
+            const isBehindCamera = vector.clone().sub(camera.position).normalize().dot(camera.getWorldDirection(new THREE.Vector3())) < 0;
             
-            // 设置标签位置
-            planet.label.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
+            // 投影到屏幕坐标
+            vector.project(camera);
             
-            // 根据行星到相机的距离设置可见性
-            const distance = camera.position.distanceTo(planet.mesh.position);
-            planet.label.style.opacity = distance < 150 ? "1" : "0";
+            // 检查是否在视野范围内
+            const isVisible = vector.x >= -1 && vector.x <= 1 && vector.y >= -1 && vector.y <= 1 && vector.z < 1;
+            
+            // 转换为屏幕坐标
+            const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+            
+            // 根据行星大小和距离调整标签位置
+            const offsetY = 25 + planet.data.radius * 5 / camera.position.distanceTo(planet.mesh.position);
+            
+            // 更新标签位置和可见性
+            if (isVisible && !isBehindCamera) {
+                planet.label.style.transform = `translate(-50%, -100%) translate(${x}px, ${y - offsetY}px)`;
+                planet.label.style.opacity = '1';
+            } else {
+                planet.label.style.opacity = '0';
+            }
+        }
+    }
+    
+    // 更新太阳标签位置
+    if (sun && sun.label && sun.label.style.display === 'block') {
+        const sunVector = new THREE.Vector3();
+        sunVector.setFromMatrixPosition(sun.matrixWorld);
+        
+        // 检查太阳是否在相机前方
+        const isSunBehindCamera = sunVector.clone().sub(camera.position).normalize().dot(camera.getWorldDirection(new THREE.Vector3())) < 0;
+        
+        sunVector.project(camera);
+        
+        // 检查是否在视野范围内
+        const isSunVisible = sunVector.x >= -1 && sunVector.x <= 1 && sunVector.y >= -1 && sunVector.y <= 1 && sunVector.z < 1;
+        
+        const sunX = (sunVector.x * 0.5 + 0.5) * window.innerWidth;
+        const sunY = (-sunVector.y * 0.5 + 0.5) * window.innerHeight;
+        
+        // 太阳标签位置偏移
+        const sunOffsetY = 35; // 太阳标签需要更大的偏移
+        
+        // 更新太阳标签位置和可见性
+        if (isSunVisible && !isSunBehindCamera) {
+            sun.label.style.transform = `translate(-50%, -100%) translate(${sunX}px, ${sunY - sunOffsetY}px)`;
+            sun.label.style.opacity = '1';
+        } else {
+            sun.label.style.opacity = '0';
+        }
+    }
+    
+    // 添加调试信息
+    if (Math.random() < 0.01) {  // 每100帧记录一次，避免日志过多
+        console.log("标签更新中 - 可见性状态:", window.isPlanetLabelsVisible);
+        
+        // 输出地球标签的状态（如果存在）
+        if (planets.earth && planets.earth.label) {
+            console.log("地球标签状态:", {
+                display: planets.earth.label.style.display,
+                opacity: planets.earth.label.style.opacity,
+                transform: planets.earth.label.style.transform
+            });
         }
     }
 }
@@ -1716,7 +1768,7 @@ function createControlPanel() {
     // 添加显示行星名称控制
     const showLabelsControl = createControlElement('显示行星名称', 'checkbox', function(checked) {
         togglePlanetLabels(checked);
-    }, { checked: true });  // 默认选中
+    }, { checked: false });  // 默认未选中
     
     // 添加控制元素到面板
     controls.appendChild(autoRotateControl);
