@@ -15,7 +15,7 @@ const planetData = {
         radius: 0.383,
         distance: 8,        // 调整距离
         speed: 0.04,
-        textureUrl: './src/assets/textures/nasa/mercury.jpg',
+        textureUrl: '/assets/textures/nasa/mercury.jpg',
         color: 0x93764C,
         satellites: [],
         info: "水星是太阳系最小的行星，也是距离太阳最近的行星。表面布满撞击坑，没有大气层。"
@@ -24,7 +24,7 @@ const planetData = {
         radius: 0.949, 
         distance: 15,       // 调整距离
         speed: 0.03,
-        textureUrl: './src/assets/textures/nasa/venus.jpg',
+        textureUrl: '/assets/textures/nasa/venus.jpg',
         color: 0xE6B87C,
         satellites: [],
         info: "金星是太阳系中最热的行星，表面温度可达460°C，拥有厚重的二氧化碳大气层。"
@@ -33,7 +33,7 @@ const planetData = {
         radius: 1, 
         distance: 25,       // 调整距离
         speed: 0.025,
-        textureUrl: './src/assets/textures/nasa/earth.jpg',
+        textureUrl: '/assets/textures/nasa/earth.jpg',
         color: 0x6B93D6,
         satellites: [
             {
@@ -41,7 +41,7 @@ const planetData = {
                 radius: 0.273,
                 distance: 2,
                 speed: 0.05,
-                textureUrl: './src/assets/textures/nasa/moon.jpg',
+                textureUrl: '/assets/textures/nasa/moon.jpg',
                 color: 0xCCCCCC,
                 info: "月球是地球唯一的天然卫星，对地球的潮汐有重要影响。"
             }
@@ -52,7 +52,7 @@ const planetData = {
         radius: 0.532, 
         distance: 35,       // 调整距离
         speed: 0.02,
-        textureUrl: './src/assets/textures/nasa/mars.jpg',
+        textureUrl: '/assets/textures/nasa/mars.jpg',
         color: 0xC1440E,
         satellites: [],
         info: "火星被称为红色星球，表面有明显的极冠和峡谷系统，曾经可能有过液态水。"
@@ -61,7 +61,7 @@ const planetData = {
         radius: 11.209, 
         distance: 48,       // 调整距离
         speed: 0.015,
-        textureUrl: './src/assets/textures/nasa/jupiter.jpg',
+        textureUrl: '/assets/textures/nasa/jupiter.jpg',
         color: 0xC88B3A,
         satellites: [
             {
@@ -69,7 +69,7 @@ const planetData = {
                 radius: 0.286,
                 distance: 3,
                 speed: 0.04,
-                textureUrl: './src/assets/textures/nasa/io.jpg',
+                textureUrl: '/assets/textures/nasa/io.jpg',
                 color: 0xFFFF00,
                 info: "木卫一(Io)是太阳系中火山活动最活跃的天体。"
             },
@@ -78,7 +78,7 @@ const planetData = {
                 radius: 0.245,
                 distance: 4,
                 speed: 0.035,
-                textureUrl: './src/assets/textures/nasa/europa.jpg',
+                textureUrl: '/assets/textures/nasa/europa.jpg',
                 color: 0xCCCCCC,
                 info: "木卫二(Europa)表面覆盖冰层，下面可能有液态水海洋。"
             }
@@ -89,8 +89,8 @@ const planetData = {
         radius: 9.449, 
         distance: 67,       // 调整距离
         speed: 0.01,
-        textureUrl: './src/assets/textures/nasa/saturn.jpg',
-        ringUrl: './src/assets/textures/nasa/saturn-rings.png',
+        textureUrl: '/assets/textures/nasa/saturn.jpg',
+        ringUrl: '/assets/textures/nasa/saturn-rings.png',
         color: 0xEAD6B8,
         satellites: [],
         info: "土星以其壮观的环系统而闻名，主要由冰粒子组成，有超过80颗已知卫星。"
@@ -99,7 +99,7 @@ const planetData = {
         radius: 4.007, 
         distance: 87,       // 调整距离
         speed: 0.008,
-        textureUrl: './src/assets/textures/nasa/uranus.jpg',
+        textureUrl: '/assets/textures/nasa/uranus.jpg',
         color: 0x82B3D1,
         satellites: [],
         info: "天王星是太阳系中唯一一个几乎侧卧旋转的行星，有27颗已知卫星。"
@@ -108,7 +108,7 @@ const planetData = {
         radius: 3.883, 
         distance: 100,      // 调整距离
         speed: 0.006,
-        textureUrl: './src/assets/textures/nasa/neptune.jpg',
+        textureUrl: '/assets/textures/nasa/neptune.jpg',
         color: 0x2B55D3,
         satellites: [],
         info: "海王星是太阳系中风速最高的行星，有明显的大暗斑和强烈的风暴系统。"
@@ -528,7 +528,7 @@ function init() {
     const sunGeometry = new THREE.SphereGeometry(3, 64, 64); // 增加太阳几何体细节
     
     // 加载NASA的太阳纹理 - 修复路径问题
-    const sunTexture = textureLoader.load('./src/assets/textures/nasa/sun.jpg');
+    const sunTexture = textureLoader.load('/assets/textures/nasa/sun.jpg');
     sunTexture.anisotropy = renderer.capabilities.getMaxAnisotropy(); // 提高纹理质量
     console.log('太阳纹理加载完成');
     
@@ -803,8 +803,8 @@ function createPlanets() {
                     128 // 分段数增加
                 );
                 
-                // 加载土星环纹理
-                const ringTexture = textureLoader.load(data.ringUrl || './src/assets/textures/nasa/saturn-rings.png');
+                // 加载土星环纹理 - 修复路径问题
+                const ringTexture = textureLoader.load(data.ringUrl || '/assets/textures/nasa/saturn-rings.png');
                 ringTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
                 
                 const ringMaterial = new THREE.MeshStandardMaterial({
@@ -904,7 +904,7 @@ function createStarfield() {
     console.log('创建星空背景...');
     
     // 加载NASA的星空纹理 - 修复路径问题
-    const starTexture = textureLoader.load('./src/assets/textures/nasa/stars.jpg');
+    const starTexture = textureLoader.load('/assets/textures/nasa/stars.jpg');
     
     // 增强纹理效果
     starTexture.wrapS = THREE.RepeatWrapping;
@@ -932,7 +932,7 @@ function createStarfield() {
     const starsGeometry = new THREE.BufferGeometry();
     
     // 加载星星纹理，使用圆形纹理替代默认方形点
-    const starTextureSprite = textureLoader.load('./src/assets/textures/nasa/star.png');
+    const starTextureSprite = textureLoader.load('/assets/textures/nasa/star.png');
     
     const starsMaterial = new THREE.PointsMaterial({
         color: 0xffffff,

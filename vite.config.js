@@ -8,7 +8,7 @@ export default defineConfig({
     // 输出目录
     outDir: 'dist',
     // 资源目录
-    assetsDir: 'assets',
+    assetsDir: 'public/assets',
     // 生成sourcemap
     sourcemap: true,
     // 压缩选项
