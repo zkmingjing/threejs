@@ -332,12 +332,12 @@ function init() {
     sunTexture.anisotropy = renderer.capabilities.getMaxAnisotropy(); // 提高纹理质量
     console.log('太阳纹理加载完成');
     
-    // 创建自发光材质，使太阳看起来更明亮
+    // 创建自发光材质，使太阳看起来更真实
     const sunMaterial = new THREE.MeshBasicMaterial({
         map: sunTexture,
-        color: 0xffcc44, // 增强黄色调使太阳更明亮
-        emissive: 0xff9c20, // 增强自发光
-        emissiveIntensity: 1.0 // 自发光强度
+        color: 0xffffff, // 使用白色，让纹理本身的颜色显示
+        emissive: 0xffa500, // 使用橙色自发光
+        emissiveIntensity: 0.5 // 降低自发光强度
     });
     
     // 创建太阳
@@ -351,7 +351,7 @@ function init() {
     const sunGlowMaterial = new THREE.ShaderMaterial({
         uniforms: {
             viewVector: { value: camera.position },
-            sunColor: { value: new THREE.Color(0xff9900) } // 太阳光晕颜色
+            sunColor: { value: new THREE.Color(0xffa07a) } // 修改太阳光晕颜色为淡珊瑚色
         },
         vertexShader: `
             uniform vec3 viewVector;
@@ -390,12 +390,12 @@ function init() {
     sunCore = new THREE.Mesh(sunCoreGeometry, sunCoreMaterial);
     scene.add(sunCore);
     
-    // 添加太阳光线效果 (使用八边形几何体)
-    const sunRaysGeometry = new THREE.CircleGeometry(15, 8);
+    // 添加太阳光晕效果 (使用圆形几何体，不再使用八边形)
+    const sunRaysGeometry = new THREE.CircleGeometry(15, 64); // 增加分段数，使其更圆滑
     const sunRaysMaterial = new THREE.MeshBasicMaterial({
-        color: 0xffcc00,
+        color: 0xffa07a,
         transparent: true,
-        opacity: 0.7, // 增加不透明度
+        opacity: 0.3, // 降低不透明度，使效果更柔和
         blending: THREE.AdditiveBlending,
         side: THREE.DoubleSide
     });
@@ -730,16 +730,21 @@ function createStarfield() {
     
     // 添加背景点状星星，增加星空效果的层次感
     const starsGeometry = new THREE.BufferGeometry();
+    
+    // 加载星星纹理，使用圆形纹理替代默认方形点
+    const starTextureSprite = textureLoader.load('./src/assets/textures/nasa/star.png');
+    
     const starsMaterial = new THREE.PointsMaterial({
         color: 0xffffff,
-        size: 0.9, // 增大星星尺寸
+        size: 1.2, // 增大星星尺寸
         transparent: true,
         opacity: 1.0, // 完全不透明
-        sizeAttenuation: true
+        sizeAttenuation: true,
+        map: starTextureSprite // 使用星星纹理
     });
     
     const starsVertices = [];
-    for (let i = 0; i < 30000; i++) { // 进一步增加星星数量
+    for (let i = 0; i < 8000; i++) { // 减少星星数量
         const x = (Math.random() - 0.5) * 500;
         const y = (Math.random() - 0.5) * 500;
         const z = (Math.random() - 0.5) * 500;
@@ -753,15 +758,16 @@ function createStarfield() {
     // 添加发光星云效果
     const nebulaMaterial = new THREE.PointsMaterial({
         color: 0x5599ff, // 更亮的蓝色
-        size: 4,    // 增大尺寸
+        size: 5,    // 增大尺寸
         transparent: true,
         opacity: 0.6, // 增加星云不透明度
         sizeAttenuation: true,
-        blending: THREE.AdditiveBlending
+        blending: THREE.AdditiveBlending,
+        map: starTextureSprite // 使用相同的星星纹理
     });
     
     const nebulaVertices = [];
-    for (let i = 0; i < 800; i++) { // 增加星云粒子数量
+    for (let i = 0; i < 300; i++) { // 减少星云粒子数量
         const x = (Math.random() - 0.5) * 400;
         const y = (Math.random() - 0.5) * 400;
         const z = (Math.random() - 0.5) * 400;
