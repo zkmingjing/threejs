@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
-import basicSsl from '@vitejs/plugin-basic-ssl'
+// 移除SSL插件，不再需要
+// import basicSsl from '@vitejs/plugin-basic-ssl'
 
 export default defineConfig({
   // 构建配置
@@ -21,10 +22,11 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
-    https: true
+    // 关闭HTTPS
+    https: false
   },
-  // 插件配置
+  // 移除SSL插件
   plugins: [
-    basicSsl()
+    // basicSsl()
   ]
 }) 

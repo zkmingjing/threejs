@@ -3,15 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>太阳系行星展示</title>
-    <!-- 添加 Three.js 依赖 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <title>3D模型演示</title>
+    <!-- 使用模块化方式导入主脚本 -->
+    <script type="module" src="./src/main.js"></script>
     <style>
         body {
             margin: 0;
             overflow: hidden;
             background-color: #000;
+        }
+        
+        /* 模型选择下拉框样式 */
+        .model-selector {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 40, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .model-selector select {
+            background: rgba(0, 0, 40, 0.5);
+            color: #00ffff;
+            border: 1px solid rgba(0, 150, 255, 0.5);
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 16px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .model-selector select:hover {
+            background: rgba(0, 0, 60, 0.7);
+            border-color: rgba(0, 255, 255, 0.7);
+        }
+        
+        .model-selector select:focus {
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        
+        .model-selector label {
+            font-size: 16px;
+            cursor: pointer;
+            user-select: none;
         }
         
         /* 弹窗样式 */
@@ -428,24 +471,23 @@
     </style>
 </head>
 <body>
-    <!-- 弹窗组件 -->
-    <div class="modal-overlay" id="modalOverlay"></div>
-    <div class="planet-modal" id="planetModal">
+    <!-- 模型选择下拉框 -->
+    <div class="model-selector">
+        <label for="model-select">选择模型：</label>
+        <select id="model-select">
+            <option value="solar-system">太阳系</option>
+            <option value="volcano">火山喷发</option>
+        </select>
+    </div>
+
+    <!-- 行星弹窗容器 -->
+    <div id="modalOverlay" class="modal-overlay"></div>
+    <div id="planetModal" class="planet-modal">
         <div class="modal-header">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
             <h2 id="planetName"></h2>
+            <span class="close-modal" onclick="closeModal()">×</span>
         </div>
-        <div class="modal-content">
-            <div class="planet-info">
-                <p>半径: <span id="planetRadius"></span></p>
-                <p>距离太阳: <span id="planetDistance"></span></p>
-                <p>公转速度: <span id="planetSpeed"></span></p>
-            </div>
-            <div class="satellites-list">
-                <h3>卫星</h3>
-                <div id="satellitesList"></div>
-            </div>
-        </div>
+        <div class="modal-content" id="planetInfo"></div>
     </div>
 
     <!-- 添加名称显示开关 -->
@@ -453,15 +495,5 @@
         <label>显示名称</label>
         <input type="checkbox" id="showNames">
     </div>
-
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js"
-            }
-        }
-    </script>
-    <script type="module" src="solar-system.js"></script>
 </body>
 </html> 

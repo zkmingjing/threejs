@@ -10,7 +10,7 @@ const planetData = {
         radius: 0.383,
         distance: 5,
         speed: 0.04,
-        textureUrl: 'textures/mercury.jpg',
+        textureUrl: '../assets/textures/mercury.jpg',
         color: 0x93764C,
         satellites: []
     },
@@ -18,7 +18,7 @@ const planetData = {
         radius: 0.949, 
         distance: 7,
         speed: 0.03,
-        textureUrl: 'textures/venus.jpg',
+        textureUrl: '../assets/textures/venus.jpg',
         color: 0xE6B87C,
         satellites: []
     },
@@ -26,7 +26,7 @@ const planetData = {
         radius: 1, 
         distance: 10,
         speed: 0.025,
-        textureUrl: 'textures/earth.jpg',
+        textureUrl: '../assets/textures/earth.jpg',
         color: 0x6B93D6,
         satellites: [
             {
@@ -34,7 +34,7 @@ const planetData = {
                 radius: 0.273,
                 distance: 2,
                 speed: 0.05,
-                textureUrl: 'textures/moon.jpg',
+                textureUrl: '../assets/textures/moon.jpg',
                 color: 0xCCCCCC
             }
         ]
@@ -43,7 +43,7 @@ const planetData = {
         radius: 0.532, 
         distance: 13,
         speed: 0.02,
-        textureUrl: 'textures/mars.jpg',
+        textureUrl: '../assets/textures/mars.jpg',
         color: 0xC1440E,
         satellites: []
     },
@@ -51,7 +51,7 @@ const planetData = {
         radius: 11.209, 
         distance: 18,
         speed: 0.015,
-        textureUrl: 'textures/jupiter.jpg',
+        textureUrl: '../assets/textures/jupiter.jpg',
         color: 0xC88B3A,
         satellites: [
             {
@@ -59,7 +59,7 @@ const planetData = {
                 radius: 0.286,
                 distance: 3,
                 speed: 0.04,
-                textureUrl: 'textures/io.jpg',
+                textureUrl: '../assets/textures/satellites/io.jpg',
                 color: 0xFFFF00
             },
             {
@@ -67,7 +67,7 @@ const planetData = {
                 radius: 0.245,
                 distance: 4,
                 speed: 0.035,
-                textureUrl: 'textures/europa.jpg',
+                textureUrl: '../assets/textures/satellites/europa.jpg',
                 color: 0xCCCCCC
             }
         ]
@@ -76,8 +76,8 @@ const planetData = {
         radius: 9.449, 
         distance: 23,
         speed: 0.01,
-        textureUrl: 'textures/saturn.jpg',
-        ringUrl: 'textures/saturn-rings.png',
+        textureUrl: '../assets/textures/saturn.jpg',
+        ringUrl: '../assets/textures/saturn-rings.png',
         color: 0xEAD6B8,
         satellites: []
     },
@@ -85,7 +85,7 @@ const planetData = {
         radius: 4.007, 
         distance: 27,
         speed: 0.008,
-        textureUrl: 'textures/uranus.jpg',
+        textureUrl: '../assets/textures/uranus.jpg',
         color: 0x82B3D1,
         satellites: []
     },
@@ -93,7 +93,7 @@ const planetData = {
         radius: 3.883, 
         distance: 30,
         speed: 0.006,
-        textureUrl: 'textures/neptune.jpg',
+        textureUrl: '../assets/textures/neptune.jpg',
         color: 0x2B55D3,
         satellites: []
     }
@@ -133,8 +133,11 @@ const textureLoader = new THREE.TextureLoader(loadingManager);
 
 // 定义彗星类
 class Comet {
-    constructor() {
+    constructor(scene) {
         console.log('正在创建彗星...');
+        
+        // 保存场景引用
+        this.scene = scene;
         
         // 彗星组
         this.group = new THREE.Group();
@@ -166,17 +169,17 @@ class Comet {
         this.period = 20;     // 周期（秒）
         this.startTime = Date.now();
         
-        // 创建一个明显的椭圆轨道
-        this.createOrbit();
-        
-        // 初始位置
-        this.updatePosition(0);
-        
-        // 添加调试信息
+        // 添加调试信息 - 移到前面创建
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
         this.debugMarker = new THREE.Mesh(geometry, material);
-        scene.add(this.debugMarker);
+        this.scene.add(this.debugMarker);
+        
+        // 创建一个明显的椭圆轨道
+        this.createOrbit();
+        
+        // 初始位置 - 移到最后调用
+        this.updatePosition(0);
         
         console.log('彗星创建完成');
     }
@@ -198,7 +201,7 @@ class Comet {
             linewidth: 2
         });
         this.orbit = new THREE.Line(geometry, material);
-        scene.add(this.orbit);
+        this.scene.add(this.orbit);
         
         console.log('轨道创建完成');
     }
@@ -265,7 +268,7 @@ function init() {
 
         // 创建彗星
         console.log('准备在init中创建彗星...');
-        comet = new Comet();
+        comet = new Comet(scene);
         scene.add(comet.group);
 
         // 创建太阳
@@ -274,14 +277,14 @@ function init() {
         const sunMaterial = new THREE.MeshBasicMaterial({ 
             map: sunTexture,
             emissive: 0xffae42,
-            emissiveIntensity: 0.5
+            emissiveIntensity: 1.0  // 增加发光强度
         });
         sun = new THREE.Mesh(sunGeometry, sunMaterial);
         sun.castShadow = true;
         scene.add(sun);
 
-        // 添加太阳光晕
-        const sunGlowGeometry = new THREE.SphereGeometry(3.2, 32, 32);
+        // 添加太阳光晕 - 增加大小和亮度
+        const sunGlowGeometry = new THREE.SphereGeometry(3.5, 32, 32);  // 增加光晕大小
         const sunGlowMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 viewVector: { value: camera.position }
@@ -292,14 +295,14 @@ function init() {
                 void main() {
                     vec3 vNormal = normalize(normalMatrix * normal);
                     vec3 vNormel = normalize(normalMatrix * viewVector);
-                    intensity = pow(0.6 - dot(vNormal, vNormel), 2.0);
+                    intensity = pow(0.7 - dot(vNormal, vNormel), 2.0);  // 增加基础亮度
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
                 }
             `,
             fragmentShader: `
                 varying float intensity;
                 void main() {
-                    vec3 glow = vec3(1.0, 0.6, 0.0) * intensity;
+                    vec3 glow = vec3(1.0, 0.7, 0.3) * intensity;  // 调整光晕颜色
                     gl_FragColor = vec4(glow, 1.0);
                 }
             `,
@@ -310,13 +313,15 @@ function init() {
         const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
         scene.add(sunGlow);
 
-        // 添加环境光
-        const ambientLight = new THREE.AmbientLight(0x404040);
+        // 添加环境光 - 调整亮度
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);  // 降低环境光强度
         scene.add(ambientLight);
 
-        // 添加点光源（太阳发出的光）
-        const pointLight = new THREE.PointLight(0xffffff, 2, 100);
+        // 添加点光源（太阳发出的光）- 增加强度和范围
+        const pointLight = new THREE.PointLight(0xffffff, 3, 150);  // 增加光照强度和范围
         pointLight.castShadow = true;
+        pointLight.shadow.mapSize.width = 2048;  // 增加阴影贴图分辨率
+        pointLight.shadow.mapSize.height = 2048;
         scene.add(pointLight);
 
         // 创建行星
@@ -365,21 +370,25 @@ function createPlanets() {
     for (let planetName in planetData) {
         const data = planetData[planetName];
         
-        // 创建行星几何体和材质
-        const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
+        // 创建行星几何体和材质 - 增加细节
+        const geometry = new THREE.SphereGeometry(data.radius, 128, 128);  // 增加几何体细节
         let material;
         
         try {
             const texture = textureLoader.load(data.textureUrl);
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();  // 提高纹理质量
             material = new THREE.MeshPhongMaterial({ 
                 map: texture,
-                shininess: 30
+                shininess: 15,  // 降低反光度使表面看起来更自然
+                bumpScale: 0.05,  // 添加凹凸效果
+                specular: 0x333333  // 减少镜面反射
             });
         } catch (error) {
             console.warn(`无法加载${planetName}的纹理，使用基础颜色`);
             material = new THREE.MeshPhongMaterial({ 
                 color: data.color,
-                shininess: 30
+                shininess: 15,
+                specular: 0x333333
             });
         }
         
@@ -388,12 +397,12 @@ function createPlanets() {
         planet.castShadow = true;
         planet.receiveShadow = true;
         
-        // 创建行星轨道
-        const orbitGeometry = new THREE.RingGeometry(data.distance - 0.1, data.distance + 0.1, 128);
+        // 创建行星轨道 - 使轨道更细致
+        const orbitGeometry = new THREE.RingGeometry(data.distance - 0.05, data.distance + 0.05, 180);  // 增加轨道细节
         const orbitMaterial = new THREE.MeshBasicMaterial({
             color: 0x666666,
             side: THREE.DoubleSide,
-            opacity: 0.3,
+            opacity: 0.2,  // 降低轨道透明度
             transparent: true
         });
         const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
@@ -402,16 +411,19 @@ function createPlanets() {
         scene.add(orbit);
         scene.add(planet);
         
-        // 如果是土星，添加光环
+        // 如果是土星，添加光环 - 改进光环效果
         if (planetName === 'saturn') {
             try {
                 const ringTexture = textureLoader.load(data.ringUrl);
-                const ringGeometry = new THREE.RingGeometry(data.radius * 1.2, data.radius * 2, 64);
+                ringTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();  // 提高纹理质量
+                const ringGeometry = new THREE.RingGeometry(data.radius * 1.4, data.radius * 2.2, 128);  // 增加环的大小和细节
                 const ringMaterial = new THREE.MeshPhongMaterial({
                     map: ringTexture,
                     side: THREE.DoubleSide,
                     transparent: true,
-                    opacity: 0.8
+                    opacity: 0.9,
+                    shininess: 5,
+                    specular: 0x222222
                 });
                 const ring = new THREE.Mesh(ringGeometry, ringMaterial);
                 ring.rotation.x = Math.PI / 2;

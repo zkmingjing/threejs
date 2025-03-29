@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 const {
 	EventDispatcher,
 	MOUSE,
@@ -1415,4 +1417,7 @@ class OrbitControls extends EventDispatcher {
 }
 
 // 将OrbitControls添加到THREE全局对象
-THREE.OrbitControls = OrbitControls;
+// THREE.OrbitControls = OrbitControls;
+
+// 使用ES模块导出
+export { OrbitControls };

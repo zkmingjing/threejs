@@ -10,9 +10,9 @@ export let isAnimating = true;
 // 创建地球材质
 export function createEarthMaterial() {
     // 加载地球的三个纹理：日间地图、夜间地图和云层
-    const dayTexture = textureLoader.load('./textures/planets/2k_earth_daymap.jpg');
-    const nightTexture = textureLoader.load('./textures/planets/2k_earth_nightmap.jpg');
-    const cloudsTexture = textureLoader.load('./textures/planets/2k_earth_clouds.jpg');
+    const dayTexture = textureLoader.load('../../assets/textures/planets/2k_earth_daymap.jpg');
+    const nightTexture = textureLoader.load('../../assets/textures/planets/2k_earth_nightmap.jpg');
+    const cloudsTexture = textureLoader.load('../../assets/textures/planets/2k_earth_clouds.jpg');
     
     // 创建地球基础材质
     const earthMaterial = new THREE.MeshPhongMaterial({
@@ -35,7 +35,7 @@ export function createEarthMaterial() {
 
 // 创建火星材质
 export function createMarsMaterial() {
-    const marsTexture = textureLoader.load('./textures/planets/2k_mars.jpg');
+    const marsTexture = textureLoader.load('../../assets/textures/planets/2k_mars.jpg');
     return new THREE.MeshPhongMaterial({
         map: marsTexture,
         bumpMap: marsTexture,
@@ -46,7 +46,7 @@ export function createMarsMaterial() {
 
 // 创建木星材质
 export function createJupiterMaterial() {
-    const jupiterTexture = textureLoader.load('./textures/planets/2k_jupiter.jpg');
+    const jupiterTexture = textureLoader.load('../../assets/textures/planets/2k_jupiter.jpg');
     return new THREE.MeshPhongMaterial({
         map: jupiterTexture,
         bumpScale: 0.1,
@@ -56,8 +56,8 @@ export function createJupiterMaterial() {
 
 // 创建土星材质
 export function createSaturnMaterial() {
-    const saturnTexture = textureLoader.load('./textures/planets/2k_saturn.jpg');
-    const ringTexture = textureLoader.load('./textures/planets/2k_saturn_ring_alpha.png');
+    const saturnTexture = textureLoader.load('../../assets/textures/planets/2k_saturn.jpg');
+    const ringTexture = textureLoader.load('../../assets/textures/planets/2k_saturn_ring_alpha.png');
     
     // 土星本体材质
     const saturnMaterial = new THREE.MeshPhongMaterial({
